@@ -1,7 +1,7 @@
 # File Explorer with Threat Detection -- FEDT
 
 ###  Overview
-**FEDT** is a C++-based project developed by **Mr. Islam Uddin** ,**Mr. WalwalKhan ** and **Mr. Ehtisham Ul Hassan** as part of the 3rd semester coursework.  
+**FEDT** is a C++-based project developed by **Mr. Islam Uddin** ,**Mr. WalwalKhan** and **Mr. Ehtisham Ul Hassan** as part of the 3rd semester coursework.  
 It combines **file management** and **security features** into a single tool using the concepts of Data Structure and Algorithms.
 
 ###  Features
