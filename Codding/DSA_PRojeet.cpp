@@ -1,5 +1,4 @@
-// main.cpp
-#pragma once
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -7,14 +6,13 @@
 #include <fstream>
 using namespace std;
 
-// ===================== FileHandler =====================
 class FileHandler {
     string currentFile;
     vector<string> fileData;
     queue<string> FilesQueues;
 
 public:
-    // kept signatures similar; changed to const ref for efficiency
+    
     bool uploadFile(const string &filename);
     void AddToQueue(const string &filename);
 
@@ -70,7 +68,7 @@ string FileHandler::getCurrentFile() const {
     return currentFile;
 }
 
-// ===================== LogNode & Logger =====================
+
 class LogNode {
 public:
     string message;
@@ -118,7 +116,6 @@ void Logger::showLogs() const {
     cout << "📝 ********************************\n";
 }
 
-// ===================== Manager =====================
 class Manager {
 public:
     void run();
@@ -175,7 +172,7 @@ void Manager::uploadFile() {
 
     if (fl.uploadFile(name)) {
         log.logEvent(" Uploaded: " + name);
-        fl.AddToQueue(name); // keep queue usage visible (optional)
+        fl.AddToQueue(name); 
     } else {
         log.logEvent(" Failed upload: " + name);
     }
@@ -186,7 +183,6 @@ void Manager::encryptFile() {
     cout << "Enter filename to encrypt: ";
     cin >> name;
 
-    // Placeholder behavior: check if file exists, then log
     ifstream fin(name);
     if (!fin.is_open()) {
         cout << " Error: File not found: " << name << "\n";
@@ -195,7 +191,7 @@ void Manager::encryptFile() {
     }
     fin.close();
 
-    // placeholder — actual encryption logic should be added later
+    
     cout << " (placeholder) Encrypting " << name << " ... Done.\n";
     log.logEvent(" Encrypted: " + name);
 }
@@ -213,7 +209,7 @@ void Manager::hashFile() {
     }
     fin.close();
 
-    // placeholder — actual hashing logic should be added later
+    
     cout << " (placeholder) Hash generated for " << name << ": [SAMPLE_HASH]\n";
     log.logEvent(" Hashed: " + name);
 }
@@ -230,7 +226,6 @@ void Manager::scanFile() {
         return;
     }
 
-    // lightweight placeholder scan: check for suspicious keywords (very simple)
     string line;
     bool suspicious = false;
     while (getline(fin, line)) {
