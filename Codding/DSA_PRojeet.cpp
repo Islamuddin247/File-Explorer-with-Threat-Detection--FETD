@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 // main.cpp
+=======
+
+>>>>>>> a2c13b9f5de865268722ac65fe6885b75a6a5ef6
 #include <iostream>
 #include <string>
 #include <vector>
@@ -6,15 +10,19 @@
 #include <fstream>
 using namespace std;
 
+<<<<<<< HEAD
 // ===================== FileHandler =====================
 class FileHandler
 {
+=======
+class FileHandler {
+>>>>>>> a2c13b9f5de865268722ac65fe6885b75a6a5ef6
     string currentFile;
     vector<string> fileData;
     queue<string> FilesQueues;
 
 public:
-    // kept signatures similar; changed to const ref for efficiency
+    
     bool uploadFile(const string &filename);
     void AddToQueue(const string &filename);
 
@@ -143,9 +151,14 @@ string FileHandler::getCurrentFile() const
     return currentFile;
 }
 
+<<<<<<< HEAD
 // ===================== LogNode & Logger =====================
 class LogNode
 {
+=======
+
+class LogNode {
+>>>>>>> a2c13b9f5de865268722ac65fe6885b75a6a5ef6
 public:
     string message;
     LogNode *next;
@@ -199,9 +212,13 @@ void Logger::showLogs() const
     cout << " ********************************\n";
 }
 
+<<<<<<< HEAD
 // ===================== Manager =====================
 class Manager
 {
+=======
+class Manager {
+>>>>>>> a2c13b9f5de865268722ac65fe6885b75a6a5ef6
 public:
     void run();
 
@@ -278,10 +295,15 @@ void Manager::uploadFile()
     if (fl.uploadFile(name))
     {
         log.logEvent(" Uploaded: " + name);
+<<<<<<< HEAD
         fl.AddToQueue(name); // keep queue usage visible (optional)
     }
     else
     {
+=======
+        fl.AddToQueue(name); 
+    } else {
+>>>>>>> a2c13b9f5de865268722ac65fe6885b75a6a5ef6
         log.logEvent(" Failed upload: " + name);
         int retry;
         cout << "1. Do you want to retry\n2. Create a New file with this name  \n0 else exit\nEnter your choice: ";
@@ -308,7 +330,6 @@ void Manager::encryptFile()
     cout << "Enter filename to encrypt: ";
     cin >> name;
 
-    // Placeholder behavior: check if file exists, then log
     ifstream fin(name);
     if (!fin.is_open())
     {
@@ -318,7 +339,7 @@ void Manager::encryptFile()
     }
     fin.close();
 
-    // placeholder — actual encryption logic should be added later
+    
     cout << " (placeholder) Encrypting " << name << " ... Done.\n";
     log.logEvent(" Encrypted: " + name);
 }
@@ -338,7 +359,7 @@ void Manager::hashFile()
     }
     fin.close();
 
-    // placeholder — actual hashing logic should be added later
+    
     cout << " (placeholder) Hash generated for " << name << ": [SAMPLE_HASH]\n";
     log.logEvent(" Hashed: " + name);
 }
@@ -357,7 +378,6 @@ void Manager::scanFile()
         return;
     }
 
-    // lightweight placeholder scan: check for suspicious keywords (very simple)
     string line;
     bool suspicious = false;
     while (getline(fin, line))
