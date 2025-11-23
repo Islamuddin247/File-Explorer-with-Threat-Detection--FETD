@@ -1,28 +1,140 @@
-<<<<<<< HEAD
-// main.cpp
-=======
-
->>>>>>> a2c13b9f5de865268722ac65fe6885b75a6a5ef6
 #include <iostream>
 #include <string>
 #include <vector>
 #include <queue>
 #include <fstream>
+#include <limits> // added for safe cin.ignore usage
 using namespace std;
 
-<<<<<<< HEAD
+class LogNode 
+{
+public:
+    string message;
+    LogNode *next;
+    LogNode(const string &msg) : message(msg), next(nullptr) {}
+};
+class Stack
+{
+public:
+    LogNode *histroy; // as a Head
+    Stack()
+    {
+        histroy = nullptr;
+    }
+    void push(string data)
+    {
+        LogNode *tem = new LogNode(data);
+        if (!histroy)
+        {
+            histroy = tem;
+        }
+        else
+        {
+            tem->next = histroy;
+            histroy = tem;
+        }
+    }
+    void pop()
+    {
+        if (!histroy)
+        {
+            cout << "No Encrypted File : " << endl;
+            return;
+        }
+        LogNode *tem = histroy;
+        histroy = histroy->next;
+       
+        cout << "Popped From Stack " << tem->message << endl;
+        delete tem;
+    }
+    string Top()
+    {
+        if (!histroy)
+        {
+            cout << "No Encrypted File : " << endl;
+            return "-1";
+        }
+        else
+        {
+            return histroy->message;
+        }
+    }
+    void Delete(string name)
+    {
+        //  only attempt to delete file on disk if it actually exists
+        ifstream checkFile(name);
+        if (checkFile.is_open())
+        {
+            checkFile.close();
+            if (remove(name.c_str()) == 0)
+            {
+                cout << " File deleted successfully: " << name << "\n";
+            }
+            else
+            {
+                cout << " Error deleting file: " << name << "\n";
+            }
+        }
+
+        LogNode *tem = histroy;
+        LogNode *prev = nullptr;
+        bool find = false;
+        while (tem)
+        {
+            if (tem->message == name)
+            {
+                find = true;
+                break;
+            }
+            prev = tem;
+            tem = tem->next;
+        }
+        if (find)
+        {
+            if (prev)
+            {
+                
+                prev->next = tem->next;
+                delete tem; 
+            }
+            else
+            {
+                histroy = tem->next;
+                delete tem; 
+            }
+            cout << "Removed from stack " << endl;
+        }
+        else
+        {
+            cout << "Not Encrypted !! " << endl;
+        }
+    }
+    bool FindFile(string name, int x)
+    {
+
+        LogNode *tem = histroy;
+        while (tem)
+        {
+            if (tem->message == name)
+            {
+                return true;
+            }
+            tem = tem->next;
+        }
+        return false;
+    }
+};
+
 // ===================== FileHandler =====================
 class FileHandler
 {
-=======
-class FileHandler {
->>>>>>> a2c13b9f5de865268722ac65fe6885b75a6a5ef6
     string currentFile;
     vector<string> fileData;
     queue<string> FilesQueues;
+    Stack history;
 
 public:
-    
+    // kept signatures similar; changed to const ref for efficiency
     bool uploadFile(const string &filename);
     void AddToQueue(const string &filename);
 
@@ -31,11 +143,17 @@ public:
     string getCurrentFile() const;
     void CreatFile(const string &filename);
     void DeleteFile(const string &filename);
+    void encryption(const string &filename);
+    void AddToStack(const string &filename);
+    void EcryptedFile(const string &filename);
+    void DecryptedFile(const string &filename);
 };
 
-void FileHandler::CreatFile(const string &filename) {
+void FileHandler::CreatFile(const string &filename)
+{
     ofstream NewFile(filename, ios::out);
-    if (!NewFile) {
+    if (!NewFile)
+    {
         cout << " Error creating file " << filename << "\n";
         return;
     }
@@ -44,13 +162,16 @@ void FileHandler::CreatFile(const string &filename) {
     int choice;
     cout << " Do you want to add content to the file now? (1 for Yes / 0 for No): ";
     cin >> choice;
-    cin.ignore();
-    if (choice == 1) {
+    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // make ignore robust
+    if (choice == 1)
+    {
         string line;
         cout << " Enter content line by line. Type 'END' on a new line to finish:\n";
-        while (true) {
+        while (true)
+        {
             getline(cin, line);
-            if (line == "END") break;
+            if (line == "END")
+                break;
             NewFile << line << "\n";
         }
         cout << " Content added to " << filename << "\n";
@@ -58,28 +179,181 @@ void FileHandler::CreatFile(const string &filename) {
     NewFile.close();
 
     //  Add the newly created file to queue
-    AddToQueue(filename);
+    // AddToQueue(filename);
 }
 
-void FileHandler::DeleteFile(const string &filename) {
+void FileHandler::encryption(const string &filename)
+{
+    queue<string> tem;
+    bool check = false;
+
+    while (!FilesQueues.empty())
+    {
+        if (FilesQueues.front() == filename)
+        {
+            check = true;
+        }
+        tem.push(FilesQueues.front());
+        FilesQueues.pop();
+    }
+
+    FilesQueues = tem;
+    if (!check)
+    {
+        cout << "File not in queue." << endl;
+        return;
+    }
+    string key;
+    string encrypted = "Encrypted" + filename;
+    if (check)
+    {
+        ifstream InFile(filename);
+        if (!InFile.is_open())
+        {
+            cout << "Error opening " << filename << endl;
+            return;
+        }
+
+        ofstream Efile(encrypted, ios::out);
+        if (!Efile.is_open())
+        {
+            cout << "Error creating encrypted file: " << encrypted << endl;
+            InFile.close();
+            return;
+        }
+
+        cout << "Enter the Key : ";
+        cin >> key;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n'); //  consume newline
+
+        string line;
+        while (getline(InFile, line))
+        {
+            string cipher;
+            int i = 0;
+            for (char c : line)
+            {
+                if (isalpha(static_cast<unsigned char>(c)))
+                {
+                    char p = toupper(static_cast<unsigned char>(c));
+                    char k = toupper(static_cast<unsigned char>(key[i % key.size()]));
+                    char enc = ((p - 'A') + (k - 'A')) % 26 + 'A';
+                    cipher.push_back(enc);
+                    i++;
+                }
+                else
+                    cipher.push_back(c);
+            }
+            Efile << cipher << endl;
+        }
+
+        // ensure files are closed before deleting original
+        InFile.close(); 
+        Efile.close(); 
+
+        AddToStack(encrypted);
+        AddToStack(key);
+
+        // Delete original file from disk and queue
+        DeleteFile(filename);
+    }
+}
+void FileHandler::DecryptedFile(const string &filename)
+{
+    string Fname = "Encrypted" + filename;
+    if (history.FindFile(Fname, 1))
+    {
+        string key;
+        cout << "Enter the Key : ";
+        cin >> key;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        if (history.FindFile(key, 2))
+        {
+            ifstream Infile(Fname);
+            if (!Infile.is_open())
+            {
+                cout << " Error opening: " << Fname << "\n";
+                return;
+            }
+            ofstream WriteFile(filename, ios::out);
+            if (!WriteFile.is_open())
+            {
+                cout << " Error creating output file: " << filename << "\n";
+                Infile.close();
+                return;
+            }
+            string cipher;
+
+            while (getline(Infile, cipher))
+            {
+                string plain;
+                int i = 0;
+                for (char c : cipher)
+                {
+                    if (isalpha(static_cast<unsigned char>(c)))
+                    {
+                        char e = toupper(static_cast<unsigned char>(c));
+                        char k = toupper(static_cast<unsigned char>(key[i % key.size()]));
+                        char dec = ((e - 'A') - (k - 'A') + 26) % 26 + 'A';
+                        plain.push_back(dec);
+                        i++;
+                    }
+                    else
+                        plain.push_back(c);
+                }
+                WriteFile << plain << endl;
+            }
+            Infile.close(); 
+            WriteFile.close(); 
+
+            AddToQueue(filename);
+            // Delete only the encrypted file and the key from stack
+            history.Delete(Fname);
+            history.Delete(key);
+        }
+        else
+        {
+            cout << "Key in not Correct " << endl;
+        }
+    }
+    else
+    {
+        cout << "File is not Encrypted " << endl;
+    }
+}
+void FileHandler::DeleteFile(const string &filename)
+{
     bool deleted = false;
 
-    //  Delete file from disk
-    if (remove(filename.c_str()) != 0) {
-        cout << " Error deleting file: " << filename << "\n";
-    } else {
-        cout << " File deleted successfully: " << filename << "\n";
-        deleted = true;
+    //  Delete file from disk only if it exists
+    ifstream check(filename);
+    if (check.is_open())
+    {
+        check.close();
+        if (remove(filename.c_str()) != 0)
+        {
+            cout << " Error deleting file: " << filename << "\n";
+        }
+        else
+        {
+            cout << " File deleted successfully: " << filename << "\n";
+            deleted = true;
+        }
     }
+    
 
     //  Remove file from queue
     queue<string> temp;
     bool found = false;
 
-    while (!FilesQueues.empty()) {
-        if (FilesQueues.front() == filename) {
+    while (!FilesQueues.empty())
+    {
+        if (FilesQueues.front() == filename)
+        {
             found = true; // skip this file
-        } else {
+        }
+        else
+        {
             temp.push(FilesQueues.front());
         }
         FilesQueues.pop();
@@ -125,6 +399,11 @@ void FileHandler::AddToQueue(const string &filename)
     FilesQueues.push(filename);
     cout << "  Queued: " << filename << "\n";
 }
+void FileHandler::AddToStack(const string &filename)
+{
+    history.push(filename);
+    cout << " Stacked : " << filename << endl;
+}
 
 void FileHandler::displayfile() const
 {
@@ -151,19 +430,7 @@ string FileHandler::getCurrentFile() const
     return currentFile;
 }
 
-<<<<<<< HEAD
 // ===================== LogNode & Logger =====================
-class LogNode
-{
-=======
-
-class LogNode {
->>>>>>> a2c13b9f5de865268722ac65fe6885b75a6a5ef6
-public:
-    string message;
-    LogNode *next;
-    LogNode(const string &msg) : message(msg), next(nullptr) {}
-};
 
 class Logger
 {
@@ -212,13 +479,9 @@ void Logger::showLogs() const
     cout << " ********************************\n";
 }
 
-<<<<<<< HEAD
 // ===================== Manager =====================
 class Manager
 {
-=======
-class Manager {
->>>>>>> a2c13b9f5de865268722ac65fe6885b75a6a5ef6
 public:
     void run();
 
@@ -239,7 +502,7 @@ void Manager::run()
     int choice;
     do
     {
-        cout << "\n========== Secure File Vault ==========\n";
+        cout << "\n========== Secure File Vault ==========" << "\n";
         cout << "1.  Upload File\n";
         cout << "2.  Encrypt File (placeholder)\n";
         cout << "3.  Generate Hash (placeholder)\n";
@@ -252,7 +515,7 @@ void Manager::run()
         if (!(cin >> choice))
         {
             cin.clear();
-            cin.ignore('\n');
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
             cout << " Invalid input. Please enter a number.\n";
             continue;
         }
@@ -295,15 +558,10 @@ void Manager::uploadFile()
     if (fl.uploadFile(name))
     {
         log.logEvent(" Uploaded: " + name);
-<<<<<<< HEAD
         fl.AddToQueue(name); // keep queue usage visible (optional)
     }
     else
     {
-=======
-        fl.AddToQueue(name); 
-    } else {
->>>>>>> a2c13b9f5de865268722ac65fe6885b75a6a5ef6
         log.logEvent(" Failed upload: " + name);
         int retry;
         cout << "1. Do you want to retry\n2. Create a New file with this name  \n0 else exit\nEnter your choice: ";
@@ -326,22 +584,29 @@ void Manager::uploadFile()
 
 void Manager::encryptFile()
 {
-    string name;
-    cout << "Enter filename to encrypt: ";
-    cin >> name;
-
-    ifstream fin(name);
-    if (!fin.is_open())
+    int option;
+    cout << "Enter Option \n1 Encyption  \n2 Decryption : ";
+    cin >> option;
+    if (option == 1)
     {
-        cout << " Error: File not found: " << name << "\n";
-        log.logEvent(" Encrypt failed (not found): " + name);
-        return;
-    }
-    fin.close();
+        string name;
+        cout << "Enter filename to encrypt: ";
+        cin >> name;
 
-    
-    cout << " (placeholder) Encrypting " << name << " ... Done.\n";
-    log.logEvent(" Encrypted: " + name);
+        fl.encryption(name);
+        cout << " (placeholder) Encrypting " << name << " ... Done.\n";
+        log.logEvent(" Encrypted: " + name);
+    }
+    else if (option == 2)
+    {
+        string name;
+        cout << "Enter filename to Dencrypt: ";
+        cin >> name;
+
+        fl.DecryptedFile(name);
+        cout << " (placeholder) Dencrypting " << name << " ... Done.\n";
+        log.logEvent(" Dencrypted: " + name);
+    }
 }
 
 void Manager::hashFile()
@@ -359,7 +624,7 @@ void Manager::hashFile()
     }
     fin.close();
 
-    
+    // placeholder — actual hashing logic should be added later
     cout << " (placeholder) Hash generated for " << name << ": [SAMPLE_HASH]\n";
     log.logEvent(" Hashed: " + name);
 }
@@ -378,6 +643,7 @@ void Manager::scanFile()
         return;
     }
 
+    // lightweight placeholder scan: check for suspicious keywords (very simple)
     string line;
     bool suspicious = false;
     while (getline(fin, line))
@@ -412,7 +678,7 @@ void Manager::FileMenu()
     int choice;
     do
     {
-        cout << "\n========== File Menu ==========\n";
+        cout << "\n========== File Menu ==========" << "\n";
         cout << "1.  Display Current File\n";
         cout << "2.  Show Current Filename\n";
         cout << "3.  Show File Data Summary\n";
@@ -424,7 +690,7 @@ void Manager::FileMenu()
         if (!(cin >> choice))
         {
             cin.clear();
-            cin.ignore();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
             cout << " Invalid input. Please enter a number.\n";
             continue;
         }
