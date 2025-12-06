@@ -283,14 +283,26 @@ string FileHandler::generateHash(const string &filename) {
 void FileHandler::saveHashFile(string originalName, string hashString) {
     string newFileName = originalName + ".hash";
     ofstream file(newFileName);
-    
+
     if (file.is_open()) {
-        file << hashString; 
+        file << hashString;
         file.close();
         cout << " Hash saved to file: " << newFileName << "\n";
         treeIndex.addFile(newFileName);
-        AddToQueue(newFileName); 
+        AddToQueue(newFileName);
     } else {
         cout << " Error creating hash file.\n";
+    }
+}
+
+void FileHandler::DeleteFile(const string &filename) {
+    bool deleted = false;
+
+    // 1️ Delete file from disk
+    if (remove(filename.c_str()) != 0) {
+        cout << " Error deleting file: " << filename << "\n";
+    } else {
+        cout << " File deleted: " << filename << "\n";
+        deleted = true;
     }
 }
