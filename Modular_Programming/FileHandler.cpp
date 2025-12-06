@@ -76,7 +76,7 @@ void FileHandler::CreatFile(const string &filename) {
 void FileHandler::DeleteFile(const string &filename) {
     bool deleted = false;
 
-    // 1️⃣ Delete file from disk
+    // 1️ Delete file from disk
     if (remove(filename.c_str()) != 0) {
         cout << " Error deleting file: " << filename << "\n";
     } else {

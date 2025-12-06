@@ -6,13 +6,114 @@
 #include <limits> // added for safe cin.ignore usage
 using namespace std;
 
-class LogNode 
+class LogNode
 {
 public:
     string message;
     LogNode *next;
     LogNode(const string &msg) : message(msg), next(nullptr) {}
 };
+
+struct BSTNode {
+    string fileName;
+    BSTNode *left;
+    BSTNode *right;
+    BSTNode(string name) : fileName(name), left(nullptr), right(nullptr) {}
+};
+
+class FileSearchTree {
+    BSTNode* root;
+
+    // Recursive Insert: Places file in correct sorted position
+    BSTNode* insert(BSTNode* node, string name) {
+        if (!node) return new BSTNode(name);
+        if (name < node->fileName)
+            node->left = insert(node->left, name);
+        else if (name > node->fileName)
+            node->right = insert(node->right, name);
+        return node; // Return unchanged node pointer
+    }
+
+    // Recursive Search: Finds file efficiently
+    bool search(BSTNode* node, string name) {
+        if (!node) return false;
+        if (node->fileName == name) return true;
+        
+        if (name < node->fileName) 
+            return search(node->left, name);
+        else 
+            return search(node->right, name);
+    }
+
+    // Recursive In-Order Traversal: Prints files A-Z
+    void inOrder(BSTNode* node) {
+        if (!node) return;
+        inOrder(node->left);
+        cout << "  - " << node->fileName << "\n";
+        inOrder(node->right);
+    }
+
+    // Helper: Find minimum value node (for deletion logic)
+    BSTNode* minValueNode(BSTNode* node) {
+        BSTNode* current = node;
+        while (current && current->left != nullptr)
+            current = current->left;
+        return current;
+    }
+
+    // Recursive Delete: Removes file and re-links the tree
+    BSTNode* deleteNode(BSTNode* root, string name) {
+        if (!root) return root;
+
+        if (name < root->fileName)
+            root->left = deleteNode(root->left, name);
+        else if (name > root->fileName)
+            root->right = deleteNode(root->right, name);
+        else {
+            // Node with only one child or no child
+            if (!root->left) {
+                BSTNode* temp = root->right;
+                delete root;
+                return temp;
+            } else if (!root->right) {
+                BSTNode* temp = root->left;
+                delete root;
+                return temp;
+            }
+            // Node with two children: Get the inorder successor
+            BSTNode* temp = minValueNode(root->right);
+            root->fileName = temp->fileName; // Copy content
+            root->right = deleteNode(root->right, temp->fileName); // Delete duplicate
+        }
+        return root;
+    }
+
+public:
+    FileSearchTree() : root(nullptr) {}
+
+    void addFile(string name) {
+        root = insert(root, name);
+    }
+
+    bool findFile(string name) {
+        return search(root, name);
+    }
+
+    void removeFile(string name) {
+        root = deleteNode(root, name);
+    }
+
+    void showSortedFiles() {
+        if (!root) {
+            cout << "  (Index is empty)\n";
+            return;
+        }
+        cout << "\n --- Files (Alphabetical Order via Tree) ---\n";
+        inOrder(root);
+        cout << " -------------------------------------------\n";
+    }
+};
+
 class Stack
 {
 public:
@@ -43,7 +144,7 @@ public:
         }
         LogNode *tem = histroy;
         histroy = histroy->next;
-       
+
         cout << "Popped From Stack " << tem->message << endl;
         delete tem;
     }
@@ -93,14 +194,14 @@ public:
         {
             if (prev)
             {
-                
+
                 prev->next = tem->next;
-                delete tem; 
+                delete tem;
             }
             else
             {
                 histroy = tem->next;
-                delete tem; 
+                delete tem;
             }
             cout << "Removed from stack " << endl;
         }
@@ -132,7 +233,7 @@ class FileHandler
     vector<string> fileData;
     queue<string> FilesQueues;
     Stack history;
-
+    FileSearchTree treeIndex;
 public:
     // kept signatures similar; changed to const ref for efficiency
     bool uploadFile(const string &filename);
@@ -147,8 +248,77 @@ public:
     void AddToStack(const string &filename);
     void EcryptedFile(const string &filename);
     void DecryptedFile(const string &filename);
-};
+    void searchInVault(string name);
+    void showDirectory();
 
+    // ... inside FileHandler public section ...
+
+    string generateHash(const string &filename) {
+        ifstream file(filename);
+        if (!file.is_open()) return ""; 
+
+        string allHashes = ""; // Variable to hold the final multiline string
+        string line;
+
+        // 1. Read file Line-by-Line
+        while (getline(file, line)) {
+            
+            // Reset hash calculation for this specific line
+            unsigned long long hash = 5381; 
+            for (char c : line) {
+                hash = ((hash << 5) + hash) + c; 
+            }
+
+            // 2. Manual Hex Conversion (Moved INSIDE loop)
+            string hexResult = "";
+            string hexDigits = "0123456789abcdef"; 
+
+            if (hash == 0) hexResult = "0";
+            else {
+                while (hash > 0) {
+                    int remainder = hash % 16;
+                    hexResult = hexDigits[remainder] + hexResult;
+                    hash /= 16;
+                }
+            }
+
+            // 3. Add this line's hash and a Newline to the result
+            allHashes += hexResult + "\n";
+        }
+
+        file.close();
+        return allHashes; // Returns a long string with all hashes separated by Enters
+    }
+
+    void saveHashFile(string originalName, string hashString) {
+        string newFileName = originalName + ".hash";
+        ofstream file(newFileName);
+        
+        if (file.is_open()) {
+            // hashString already contains "\n" from the function above
+            // so this will save neatly on separate lines.
+            file << hashString; 
+            file.close();
+            cout << " Hash saved to file: " << newFileName << "\n";
+            
+            // Add to your system
+            treeIndex.addFile(newFileName);
+            AddToQueue(newFileName); 
+        } else {
+            cout << " Error creating hash file.\n";
+        }
+    }
+};
+void FileHandler::searchInVault(string name) {
+        if(treeIndex.findFile(name))
+            cout << " [TREE SEARCH] FOUND! '" << name << "' is in the vault.\n";
+        else
+            cout << " [TREE SEARCH] '" << name << "' NOT found.\n";
+}
+
+void FileHandler::showDirectory() {
+        treeIndex.showSortedFiles();
+    }
 void FileHandler::CreatFile(const string &filename)
 {
     ofstream NewFile(filename, ios::out);
@@ -158,6 +328,9 @@ void FileHandler::CreatFile(const string &filename)
         return;
     }
     cout << " File " << filename << " created successfully.\n";
+
+    // !!! ADD TO TREE !!!
+    treeIndex.addFile(filename);
 
     int choice;
     cout << " Do you want to add content to the file now? (1 for Yes / 0 for No): ";
@@ -248,13 +421,13 @@ void FileHandler::encryption(const string &filename)
         }
 
         // ensure files are closed before deleting original
-        InFile.close(); 
-        Efile.close(); 
+        InFile.close();
+        Efile.close();
 
         AddToStack(encrypted);
         AddToStack(key);
 
-        // Delete original file from disk and queue
+        // Delete original file from disk, queue AND TREE
         DeleteFile(filename);
     }
 }
@@ -303,10 +476,13 @@ void FileHandler::DecryptedFile(const string &filename)
                 }
                 WriteFile << plain << endl;
             }
-            Infile.close(); 
-            WriteFile.close(); 
+            Infile.close();
+            WriteFile.close();
 
             AddToQueue(filename);
+            // !!! Re-add decrypted file to Tree !!!
+            treeIndex.addFile(filename);
+
             // Delete only the encrypted file and the key from stack
             history.Delete(Fname);
             history.Delete(key);
@@ -338,9 +514,10 @@ void FileHandler::DeleteFile(const string &filename)
         {
             cout << " File deleted successfully: " << filename << "\n";
             deleted = true;
+            treeIndex.removeFile(filename);
+            cout << " [Tree] Removed from Search Index.\n";
         }
     }
-    
 
     //  Remove file from queue
     queue<string> temp;
@@ -390,6 +567,8 @@ bool FileHandler::uploadFile(const string &filename)
     fin.close();
 
     cout << " File loaded: " << filename << "\n";
+// !!! ADD TO TREE !!!
+    treeIndex.addFile(filename);
 
     return true;
 }
@@ -488,6 +667,7 @@ public:
 private:
     Logger log;
     FileHandler fl;
+    vector<string> threatSignatures;
 
     void uploadFile();
     void encryptFile();
@@ -495,6 +675,7 @@ private:
     void scanFile();
     void showLogs();
     void FileMenu();
+    void LoadSignatures();
 };
 
 void Manager::run()
@@ -509,6 +690,9 @@ void Manager::run()
         cout << "4.  Scan File for Malware (placeholder)\n";
         cout << "5.  View Logs\n";
         cout << "6.  File Menu\n";
+        // !!! NEW TREE OPTIONS !!!
+        cout << "7.  Search File (Binary Tree)\n";
+        cout << "8.  List All Files (Sorted A-Z)\n";
         cout << "0.  Exit\n";
         cout << "======================================\n";
         cout << "Enter your choice: ";
@@ -540,6 +724,15 @@ void Manager::run()
         case 6:
             FileMenu();
             break;
+        case 7: {
+            string name;
+            cout << " Enter name to search: "; cin >> name;
+            fl.searchInVault(name);
+            break;
+        }
+        case 8:
+            fl.showDirectory();
+            break;
         case 0:
             cout << " Exiting program...\n";
             break;
@@ -547,6 +740,28 @@ void Manager::run()
             cout << " Invalid option.\n";
         }
     } while (choice != 0);
+}
+
+void Manager::LoadSignatures()
+{
+    ifstream fin("virus_signatures.txt", ios::in);
+    if (!fin.is_open())
+    {
+        cout << "\n Warning: virus_signatures.txt is not loaded" << endl;
+        return;
+    }
+
+    // Clear previous signatures if any, to avoid duplicates if called twice
+    threatSignatures.clear();
+
+    string line;
+    while (getline(fin, line))
+    {
+        if (!line.empty()) // Avoid adding empty lines
+            threatSignatures.push_back(line);
+    }
+    fin.close();
+    cout << "Threat database updated. " << threatSignatures.size() << " signatures loaded.\n";
 }
 
 void Manager::uploadFile()
@@ -614,23 +829,38 @@ void Manager::hashFile()
     string name;
     cout << "Enter filename to hash: ";
     cin >> name;
-
-    ifstream fin(name);
-    if (!fin.is_open())
+    
+    // Check if file exists *before* starting the hash process
+    ifstream check(name);
+    if (!check.is_open())
     {
         cout << " Error: File not found: " << name << "\n";
         log.logEvent(" Hash failed (not found): " + name);
         return;
     }
-    fin.close();
+    check.close();
 
-    // placeholder — actual hashing logic should be added later
-    cout << " (placeholder) Hash generated for " << name << ": [SAMPLE_HASH]\n";
-    log.logEvent(" Hashed: " + name);
+    // 1. Calculate the line-by-line hashes
+    // The generateHash function now returns a single string containing all hashes separated by newlines.
+    string hashString = fl.generateHash(name);
+
+    // If the file was empty, generateHash might return an empty string.
+    if (hashString.empty()) {
+        cout << " File is empty or hash generation failed.\n";
+        log.logEvent(" Hashed (empty file): " + name);
+        return;
+    }
+
+    // 2. Save the multi-line hash string to disk and register it in the system
+    fl.saveHashFile(name, hashString);
+
+    cout << " Successfully created and saved line-by-line hash for " << name << "\n";
+    log.logEvent(" Hashed (Line-by-Line) and Saved: " + name);
 }
 
 void Manager::scanFile()
 {
+    LoadSignatures();
     string name;
     cout << "Enter filename to scan: ";
     cin >> name;
@@ -648,10 +878,19 @@ void Manager::scanFile()
     bool suspicious = false;
     while (getline(fin, line))
     {
-        if (line.find("malware") != string::npos || line.find("virus") != string::npos)
+        //String Lowercase Conversion Block
+        // ==========================================
+        for (char &c : line) {
+            c = tolower(c);
+        }
+
+        for (const string &sig : threatSignatures)
         {
-            suspicious = true;
-            break;
+            if (line.find(sig) != string::npos)
+            {
+                cout << " [ALERT] Threat detected: " << sig << " on line " << endl;
+                suspicious = true;
+            }
         }
     }
     fin.close();
