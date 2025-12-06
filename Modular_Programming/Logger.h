@@ -1,16 +1,8 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-#include <iostream>
+#include "Nodes.h"
 #include <string>
-using namespace std;
-
-class LogNode {
-public:
-    string message;
-    LogNode *next;
-    LogNode(const string &msg);
-};
 
 class Logger {
     LogNode *head;
@@ -18,7 +10,7 @@ class Logger {
 public:
     Logger();
     ~Logger();
-    void logEvent(const string &message);
+    void logEvent(const std::string &message);
     void showLogs() const;
 };
 

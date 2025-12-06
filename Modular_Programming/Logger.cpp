@@ -1,15 +1,16 @@
 #include "Logger.h"
+#include <iostream>
 
-LogNode::LogNode(const string &msg) : message(msg), next(nullptr) {}
+using namespace std;
 
 Logger::Logger() : head(nullptr) {}
 
 Logger::~Logger() {
-    LogNode *temp;
+    LogNode *tem;
     while (head != nullptr) {
-        temp = head;
+        tem = head;
         head = head->next;
-        delete temp;
+        delete tem;
     }
 }
 
@@ -25,10 +26,10 @@ void Logger::showLogs() const {
         return;
     }
     cout << "\n ********* ACTION LOGS ***********\n";
-    LogNode *temp = head;
-    while (temp != nullptr) {
-        cout << " " << temp->message << "\n";
-        temp = temp->next;
+    LogNode *tem = head;
+    while (tem != nullptr) {
+        cout << " " << tem->message << "\n";
+        tem = tem->next;
     }
     cout << " ********************************\n";
 }
