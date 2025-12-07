@@ -1,0 +1,127 @@
+malware
+trojan
+virus
+formatting_disk_command
+kill_process
+kill
+# --- General Malware Types ---
+trojan
+ransomware
+spyware
+keylogger
+malware
+rootkit
+worm
+virus
+backdoor
+adware
+botnet
+cryptominer
+logic_bomb
+payload
+zero_day_exploit
+# --- Dangerous System Commands (Windows/Linux) ---
+format c:
+rm -rf
+system("shutdown")
+delete_all
+del /s /q /f
+chmod 777
+wget http://
+curl | bash
+powershell -EncodedCommand
+cmd.exe /c
+/etc/shadow
+reg delete
+mkfs.ext4
+# --- Hacking & Scripting Attacks ---
+drop_table
+injected_code
+suspicious_macro
+shell_exec
+base64_decode
+eval(
+<script>alert(1)</script>
+javascript:void(0)
+UNION SELECT
+OR 1=1
+buffer_overflow
+heap_spray
+remote_code_execution
+cross_site_scripting
+sql_injection
+# --- Phishing & Ransom Notes ---
+bitcoin_wallet
+transfer_funds_immediately
+encrypted_files
+restore_your_data
+verify_your_password
+urgent_action_required
+click_to_claim
+hacked_by
+# --- Famous Real-World Threats (Easter Eggs) ---
+wannacry
+stuxnet
+iloveyou_virus
+mimikatz
+metasploit
+cobalt_strike
+zeus_botnet
+conficker
+darkside
+notpetya
+# --- The Standard Test File ---
+X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*
+# --- Windows Persistence (Staying on the PC) ---
+HKCU\Software\Microsoft\Windows\CurrentVersion\Run
+DisableTaskMgr
+DisableRegistryTools
+DisableFirewall
+auto_start
+sc create
+schtasks /create
+reg add
+# --- Ransomware Behavior (Killing Backups) ---
+vssadmin delete shadows
+wbadmin delete catalog
+bcdedit /set
+recovery_enabled No
+ignore_failure
+backup_deleted
+# --- Network & Hacking Tools ---
+nc -e
+netcat
+reverse_tcp
+bind_shell
+listening_port
+127.0.0.1
+exfiltrate
+upload_data
+C2_server
+proxy_tunnel
+# --- Suspicious Scripting (VBS/PowerShell) ---
+wscript.shell
+filesystemobject
+Set-ExecutionPolicy Bypass
+window.location.replace
+document.cookie
+unescape(
+fromCharCode
+ActiveXObject
+CreateObject
+# --- User & Permission Attacks ---
+net user /add
+net localgroup administrators
+whoami /priv
+bypass_uac
+privilege_escalation
+takeown /f
+icacls /grant
+# --- File System Danger ---
+hidden_attribute
+alternate_data_stream
+autorun.inf
+payload.exe
+malicious.dll
+temp_folder_exec
+win32_process
