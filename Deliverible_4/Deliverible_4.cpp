@@ -26,7 +26,7 @@ class FileSearchTree
 {
     BSTNode *root;
 
-    // Recursive Insert: Places file in correct sorted position
+    // Recursive Insert Places file in correct sorted position
     BSTNode *insert(BSTNode *node, string name)
     {
         if (!node)
@@ -38,7 +38,7 @@ class FileSearchTree
         return node; // Return unchanged node pointer
     }
 
-    // Recursive Search: Finds file efficiently
+    // Recursive Search Finds file efficiently
     bool search(BSTNode *node, string name)
     {
         if (!node)
@@ -52,7 +52,7 @@ class FileSearchTree
             return search(node->right, name);
     }
 
-    // Recursive In-Order Traversal: Prints files A-Z
+    // Recursive In-Order Traversal Prints files A-Z
     void inOrder(BSTNode *node)
     {
         if (!node)
@@ -135,10 +135,11 @@ public:
     }
 };
 
+//  Stores the Encryption files and keys
 class Stack
 {
 public:
-    LogNode *histroy; // as a Head
+    LogNode *histroy; // As a Head
     Stack()
     {
         histroy = nullptr;
@@ -183,7 +184,7 @@ public:
     }
     void Delete(string name)
     {
-        //  only attempt to delete file on disk if it actually exists
+       
         ifstream checkFile(name);
         if (checkFile.is_open())
         {
@@ -597,7 +598,7 @@ void FileHandler::DeleteFile(const string &filename)
     else
         cout << "  File not found in queue: " << filename << "\n";
 
-    //  Optional: message summary
+    //   message summary
     if (deleted && found)
         cout << " File '" << filename << "' deleted and dequeued successfully.\n";
 }
@@ -622,7 +623,7 @@ bool FileHandler::uploadFile(const string &filename)
     fin.close();
 
     cout << " File loaded: " << filename << "\n";
-    // !!! ADD TO TREE !!!
+    //  ADD TO TREE
     treeIndex.addFile(filename);
 
     return true;
@@ -886,7 +887,7 @@ void Manager::hashFile()
     cout << "Enter filename to hash: ";
     cin >> name;
 
-    // Check if file exists *before* starting the hash process
+    // Check if file exists before starting the hash process
     ifstream check(name);
     if (!check.is_open())
     {
@@ -896,7 +897,7 @@ void Manager::hashFile()
     }
     check.close();
 
-    // 1. Calculate the line-by-line hashes
+    //  Calculate the line-by-line hashes
     // The generateHash function now returns a single string containing all hashes separated by newlines.
     string hashString = fl.generateHash(name);
 
@@ -908,7 +909,7 @@ void Manager::hashFile()
         return;
     }
 
-    // 2. Save the multi-line hash string to disk and register it in the system
+    //  Save the multi-line hash string to disk and register it in the system
     fl.saveHashFile(name, hashString);
 
     cout << " Successfully created and saved line-by-line hash for " << name << "\n";
@@ -930,7 +931,7 @@ void Manager::scanFile()
         return;
     }
 
-    // lightweight placeholder scan: check for suspicious keywords (very simple)
+    // lightweight placeholder scan check for suspicious keywords (very simple)
     string line;
     bool suspicious = false;
     while (getline(fin, line))
