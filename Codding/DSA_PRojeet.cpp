@@ -7,7 +7,7 @@
 using namespace std;
 
 class LogNode
-{
+{ 
 public:
     string message;
     LogNode *next;
@@ -224,6 +224,23 @@ public:
         }
         return false;
     }
+
+    void ShowEncryptedFile(){
+        if (!histroy)
+        {
+            cout<<"NO Encrypted file !!"<<endl;
+            return;
+        }
+        LogNode* tem=histroy;
+        cout<<"|n========Encrypted FIles============"<<endl;
+        while (tem !=nullptr)
+        {
+            cout<<tem->message<<endl;
+            tem=tem->next;
+        }
+        
+        
+    }
 };
 
 // ===================== FileHandler =====================
@@ -242,14 +259,14 @@ public:
     void displayfile() const;
     vector<string> getFileData() const;
     string getCurrentFile() const;
-    void CreatFile(const string &filename);
-    void DeleteFile(const string &filename);
+    void CreatFile(const string &filename);//  creates the new txt file
+    void DeleteFile(const string &filename); //     the file from queue and tree
     void encryption(const string &filename);
-    void AddToStack(const string &filename);
-    void EcryptedFile(const string &filename);
+    void AddToStack(const string &filename);// Stores the encrypted files
+    void ShowEcryptedFiles();
     void DecryptedFile(const string &filename);
     void searchInVault(string name);
-    void showDirectory();
+    void showDirectory();// showes the Sorted files from the tree
 
     // ... inside FileHandler public section ...
 
@@ -309,6 +326,9 @@ public:
         }
     }
 };
+void FileHandler::ShowEcryptedFiles(){
+    history.ShowEncryptedFile();
+}
 void FileHandler::searchInVault(string name) {
         if(treeIndex.findFile(name))
             cout << " [TREE SEARCH] FOUND! '" << name << "' is in the vault.\n";
@@ -343,7 +363,7 @@ void FileHandler::CreatFile(const string &filename)
         while (true)
         {
             getline(cin, line);
-            if (line == "END")
+            if (line == "END" || line == "end")
                 break;
             NewFile << line << "\n";
         }
@@ -685,12 +705,11 @@ void Manager::run()
     {
         cout << "\n========== Secure File Vault ==========" << "\n";
         cout << "1.  Upload File\n";
-        cout << "2.  Encrypt File (placeholder)\n";
+        cout << "2.  Encrypt/Decrypt File (placeholder)\n";
         cout << "3.  Generate Hash (placeholder)\n";
         cout << "4.  Scan File for Malware (placeholder)\n";
         cout << "5.  View Logs\n";
         cout << "6.  File Menu\n";
-        // !!! NEW TREE OPTIONS !!!
         cout << "7.  Search File (Binary Tree)\n";
         cout << "8.  List All Files (Sorted A-Z)\n";
         cout << "0.  Exit\n";
@@ -923,6 +942,7 @@ void Manager::FileMenu()
         cout << "3.  Show File Data Summary\n";
         cout << "4.  Create New File\n";
         cout << "5.  Delete a File\n";
+        cout << "6.  Show Encrypted  Files\n";
         cout << "0.  Back to Main Menu\n";
         cout << "================================\n";
         cout << "Enter your choice: ";
@@ -992,6 +1012,11 @@ void Manager::FileMenu()
             fl.DeleteFile(filename);
             log.logEvent(" Deleted: " + filename);
             break;
+        }
+        case 6:
+        {
+            fl.ShowEcryptedFiles();
+            log.logEvent("Encryted Files Showed");
         }
 
         case 0:
